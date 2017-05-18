@@ -17,9 +17,7 @@ def main(args):
     weather_src = SKPWeather(args)
 
     cur_weather = weather_src.get_curr_weather()
-    print("Cur weather : %s"%cur_weather)
-    cur_air = weather_src.get_curr_air()
-    print("Cur air : %s"%cur_air)
+    print("Cur weather : %s"%str(cur_weather))
     weather_forecast = weather_src.get_weather_forecast()
     print("Weather forecast : %s"%weather_forecast)
 
