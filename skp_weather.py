@@ -5,7 +5,7 @@ from weather_ds import Weather
 
 class SKPWeather(WeatherSource):
     def __init__(self, params):
-        super().__init__(params)
+        super(SKPWeather, self).__init__(params)
         self.appkey = params['appkey']
         self.lat = params['lat']
         self.lon = params['lon']
