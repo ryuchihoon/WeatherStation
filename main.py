@@ -12,6 +12,8 @@ def main(args):
         args['lat'] = os.environ.get('WEATHER_STATION_LAT')
     if not args['lon']:
         args['lon'] = os.environ.get('WEATHER_STATION_LON')
+    if not args['fontpath']:
+        args['fontpath'] = os.environ.get('WEATHER_STATION_FONT_PATH')
 
     print("Arguments : %s"%args)
 
@@ -22,8 +24,8 @@ def main(args):
     weather_forecast = weather_src.get_weather_forecast()
     print("Weather forecast : %s"%weather_forecast)
 
-    renderer = PapirusRenderer(args['rotate'])
-    renderer.render(cur_weather)
+    renderer = PapirusRenderer(args['rotate'], font_path=args['fontpath'])
+    renderer.render(cur_weather, weather_forecast)
 
 
 def get_parser():
@@ -38,6 +40,9 @@ def get_parser():
                         help='Rotation of epaper display',
                         default=0,
                         type=int)
+    parser.add_argument('--fontpath',
+                        help='Path to font file. ttf or otf',
+                        default=None)
     return parser
 
 if __name__ == '__main__':

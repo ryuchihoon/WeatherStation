@@ -1,7 +1,12 @@
-import collections
+#-- coding: utf-8 --
+
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
+
+import collections
+from PIL import Image, ImageOps, ImageDraw, ImageFont
+
 
 code_2_icono = collections.defaultdict(default='38')
 
@@ -41,28 +46,71 @@ def geticonfname(code):
         return "./resources/weather_icons_mod/" + l[0] + '.png'
 
 
+BLACK = 0
+WHITE = 1
+
+
+
 class PapirusRenderer:
     """Renderer for Papirus HAT"""
 
-    def __init__(self, rotate=0):
-        self.rotate = rotate
+    def __init__(self, rotate=0, font_path=None):
+        if font_path:
+            self.font_path = font_path
+        else:
+            self.font_path = "/usr/share/fonts/truetype/freefont/FreeMono.ttf"
+
+        print("rotate:",rotate)
 
         try:
-            from papirus import PapirusComposite
-            self.pcomp = PapirusComposite(False)
-            self.pcomp.AddImg(geticonfname('SKY_W00'), 20, 20, (80,80), Id="mainIcon")
-            self.pcomp.AddText('Unknown', 0, 120, Id="mainText")
-            self.pcomp.WriteAll()
+            from papirus import Papirus
+            self.papirus = Papirus(rotate=rotate)
         except ImportError:
-            self.pcomp = None
+            print("papirus import failed")
+            self.papirus = None
 
     
-    def render(self, weather):
-        if self.pcomp == None:
+    def render(self, weather, weather_forecast):
+        if self.papirus == None:
             pass
         
+        canvas = Image.new('1', self.papirus.size, WHITE)
+
+        print("font_path:",self.font_path)
+
         fname = geticonfname(weather.weather_code)
         print("file:",fname)
-        self.pcomp.UpdateImg("mainIcon", fname)
-        self.pcomp.UpdateText("mainText", str(weather.weather_desc))
-        self.pcomp.WriteAll()
+        self._drawImage(canvas, fname, 20,5,(100,100))
+        print("cur desc :",str(weather.weather_desc))
+        #self._drawText(canvas, str(weather.weather_desc), 60,100, font_size=20, center_horizontal=True)
+        temperature = str(weather.cur_temperature).split('.')[0] + " C"
+        self._drawText(canvas, temperature, 70,120, font_size=20, center_horizontal=True)
+        self._drawText(canvas, str(weather.air_quality), 70,140, font_size=20, center_horizontal=True)
+        
+        base_x,base_y = 145,10
+        for i,w in enumerate(weather_forecast):
+            fname = geticonfname(w.weather_code)
+            self._drawImage(canvas, fname, base_x, base_y+55*i, (50,50))
+            temperature = str(w.min_temperature) + " / " + str(w.max_temperature)
+            self._drawText(canvas, temperature, base_x+80, base_y+28+55*i, font_size=14, center_horizontal=True)
+
+
+        self.papirus.display(canvas)
+        self.papirus.update()
+
+
+    def _drawImage(self, canvas, image_path, x, y, size):
+        image = Image.open(image_path)
+        image = ImageOps.grayscale(image)
+        image = image.resize(size)
+        image = image.convert("1", dither=Image.FLOYDSTEINBERG)
+        canvas.paste(image,(x,y))
+
+
+    def _drawText(self, canvas, text, x, y, font_size=20, center_horizontal=False):
+        draw = ImageDraw.Draw(canvas)
+        font = ImageFont.truetype(self.font_path, font_size)
+        text_draw_size = draw.textsize(text, font=font)
+        if center_horizontal:
+            x = x - text_draw_size[0]/2
+        draw.text( (x, y) , text, font=font, fill=BLACK)
