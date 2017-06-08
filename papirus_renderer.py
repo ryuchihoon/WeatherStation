@@ -1,6 +1,6 @@
 #-- coding: utf-8 --
 
-import sys
+import sys,os
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -48,10 +48,11 @@ kor_2_eng[u'매우 나쁨'] = ['V BAD']
 
 def geticonfname(code):
     l = code_2_icono[code]
+    dname = os.path.join(os.path.dirname(__file__), "resources", "weather_icons_mod")
     if len(l) > 1:
-        return "./resources/weather_icons_mod/" + l[0] + '.png'
+        return os.path.join(dname, l[0] + '.png')
     else:
-        return "./resources/weather_icons_mod/" + l[0] + '.png'
+        return os.path.join(dname, l[0] + '.png')
 
 
 BLACK = 0
