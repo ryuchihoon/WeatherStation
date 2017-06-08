@@ -8,7 +8,8 @@ import collections
 from PIL import Image, ImageOps, ImageDraw, ImageFont
 
 
-code_2_icono = collections.defaultdict(default='38')
+code_2_icono = collections.defaultdict(lambda : '38')
+kor_2_eng = collections.defaultdict(lambda : 'UNKNOWN')
 
 code_2_icono['SKY_O00'] = ['38']
 code_2_icono['SKY_O01'] = ['01', '08']
@@ -38,6 +39,13 @@ code_2_icono['SKY_W11'] = ['04']
 code_2_icono['SKY_W12'] = ['13', '41']
 code_2_icono['SKY_W13'] = ['32']
 
+
+kor_2_eng[u'좋음'] = ['GOOD']
+kor_2_eng[u'보통'] = ['NORMAL']
+kor_2_eng[u'나쁨'] = ['BAD']
+kor_2_eng[u'매우 나쁨'] = ['V BAD']
+
+
 def geticonfname(code):
     l = code_2_icono[code]
     if len(l) > 1:
@@ -65,27 +73,29 @@ class PapirusRenderer:
         try:
             from papirus import Papirus
             self.papirus = Papirus(rotate=rotate)
+            self.canvas_size = self.papirus.size
         except ImportError:
             print("papirus import failed")
             self.papirus = None
+            self.canvas_size = (272,192)
 
     
     def render(self, weather, weather_forecast):
-        if self.papirus == None:
-            pass
         
-        canvas = Image.new('1', self.papirus.size, WHITE)
+        canvas = Image.new('1', self.canvas_size, WHITE)
 
         print("font_path:",self.font_path)
 
         fname = geticonfname(weather.weather_code)
         print("file:",fname)
         self._drawImage(canvas, fname, 20,5,(100,100))
-        print("cur desc :",str(weather.weather_desc))
-        #self._drawText(canvas, str(weather.weather_desc), 60,100, font_size=20, center_horizontal=True)
-        temperature = str(weather.cur_temperature).split('.')[0] + " C"
+        print("cur desc : %s"%str(weather.weather_desc))
+        print("cur airq : %s"%str(weather.air_quality))
+        temperature = str(weather.cur_temperature).split('.')[0] + u" \u2103"
         self._drawText(canvas, temperature, 70,120, font_size=20, center_horizontal=True)
-        self._drawText(canvas, str(weather.air_quality), 70,140, font_size=20, center_horizontal=True)
+        translated = kor_2_eng[weather.air_quality][0]
+        print("cur airq translated: %s"%translated)
+        self._drawText(canvas, translated, 70,140, font_size=20, center_horizontal=True)
         
         base_x,base_y = 145,10
         for i,w in enumerate(weather_forecast):
@@ -94,9 +104,14 @@ class PapirusRenderer:
             temperature = str(w.min_temperature) + " / " + str(w.max_temperature)
             self._drawText(canvas, temperature, base_x+80, base_y+28+55*i, font_size=14, center_horizontal=True)
 
-
-        self.papirus.display(canvas)
-        self.papirus.update()
+        if self.papirus == None:
+            # save a image for debugging purpose
+            with open("result.jpg", "wb") as fp:
+                canvas.save(fp)
+                print("result file saved")
+        else:
+            self.papirus.display(canvas)
+            self.papirus.update()
 
 
     def _drawImage(self, canvas, image_path, x, y, size):

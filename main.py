@@ -21,6 +21,7 @@ def main(args):
 
     cur_weather = weather_src.get_curr_weather()
     print("Cur weather : %s"%str(cur_weather))
+    print("Cur airqual : %s"%cur_weather.air_quality)
     weather_forecast = weather_src.get_weather_forecast()
     print("Weather forecast : %s"%weather_forecast)
 
