@@ -83,10 +83,11 @@ class PapirusRenderer:
             from papirus import Papirus
             self.papirus = Papirus(rotate=rotate)
             self.canvas_size = self.papirus.size
+            print("papirus size : %s"%str(self.canvas_size))
         except ImportError:
             print("papirus import failed")
             self.papirus = None
-            self.canvas_size = (272,192)
+            self.canvas_size = (264,176)
 
     
     def render(self, weather, weather_forecast):
@@ -106,7 +107,7 @@ class PapirusRenderer:
         print("cur airq translated: %s"%translated)
         self._drawText(canvas, translated, 70,140, font_size=20, center_horizontal=True)
         
-        base_x,base_y = 145,10
+        base_x,base_y = 145,5
         for i,w in enumerate(weather_forecast):
             fname = geticonfname(w.weather_code)
             self._drawImage(canvas, fname, base_x, base_y+55*i, (50,50))
@@ -114,7 +115,7 @@ class PapirusRenderer:
             self._drawText(canvas, temperature, base_x+80, base_y+28+55*i, font_size=14, center_horizontal=True)
 
         # update time
-        self._drawText(canvas, time.strftime("%Y-%m-%d %H:%M",time.localtime()), 136, 180, font_size=9, center_horizontal=True)
+        self._drawText(canvas, time.strftime("%Y-%m-%d %H:%M",time.localtime()), 136, 165, font_size=9, center_horizontal=True)
 
         if self.papirus == None:
             # save a image for debugging purpose
