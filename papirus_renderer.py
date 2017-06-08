@@ -97,11 +97,11 @@ class PapirusRenderer:
 
         fname = geticonfname(weather.weather_code, drawNight=True)
         print("file:",fname)
-        self._drawImage(canvas, fname, 20,5,(100,100))
+        self._drawImage(canvas, fname, 20,10,(100,100))
         print("cur desc : %s"%str(weather.weather_desc))
         print("cur airq : %s"%str(weather.air_quality))
         temperature = str(weather.cur_temperature).split('.')[0] + u" \u2103"
-        self._drawText(canvas, temperature, 70,120, font_size=20, center_horizontal=True)
+        self._drawText(canvas, temperature, 70,115, font_size=20, center_horizontal=True)
         translated = kor_2_eng[weather.air_quality][0]
         print("cur airq translated: %s"%translated)
         self._drawText(canvas, translated, 70,140, font_size=20, center_horizontal=True)
@@ -112,6 +112,9 @@ class PapirusRenderer:
             self._drawImage(canvas, fname, base_x, base_y+55*i, (50,50))
             temperature = str(w.min_temperature) + " / " + str(w.max_temperature)
             self._drawText(canvas, temperature, base_x+80, base_y+28+55*i, font_size=14, center_horizontal=True)
+
+        # update time
+        self._drawText(canvas, time.strftime("%Y-%m-%d %H:%M",time.localtime()), 136, 180, font_size=9, center_horizontal=True)
 
         if self.papirus == None:
             # save a image for debugging purpose
