@@ -1,8 +1,11 @@
 #-- coding: utf-8 --
 
-import sys,os
+import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
+
+import os
+import time
 
 import collections
 from PIL import Image, ImageOps, ImageDraw, ImageFont
@@ -46,11 +49,16 @@ kor_2_eng[u'나쁨'] = ['BAD']
 kor_2_eng[u'매우 나쁨'] = ['V BAD']
 
 
-def geticonfname(code):
+def geticonfname(code, drawNight=False):
     l = code_2_icono[code]
     dname = os.path.join(os.path.dirname(__file__), "resources", "weather_icons_mod")
-    if len(l) > 1:
-        return os.path.join(dname, l[0] + '.png')
+    if len(l) > 1 and drawNight:
+        cur_hour = time.localtime().tm_hour
+        is_night = cur_hour < 5 or cur_hour > 18
+        if is_night:
+            return os.path.join(dname, l[1] + '.png')
+        else:
+            return os.path.join(dname, l[0] + '.png')
     else:
         return os.path.join(dname, l[0] + '.png')
 
@@ -87,7 +95,7 @@ class PapirusRenderer:
 
         print("font_path:",self.font_path)
 
-        fname = geticonfname(weather.weather_code)
+        fname = geticonfname(weather.weather_code, drawNight=True)
         print("file:",fname)
         self._drawImage(canvas, fname, 20,5,(100,100))
         print("cur desc : %s"%str(weather.weather_desc))
